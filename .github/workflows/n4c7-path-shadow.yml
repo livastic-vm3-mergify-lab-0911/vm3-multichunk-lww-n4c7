@@ -1,0 +1,40 @@
+name: VM3 setup-cli path shadow
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Simulate prior untrusted PATH write
+        run: |
+          mkdir -p "$RUNNER_TEMP/attacker-bin"
+          cat > "$RUNNER_TEMP/attacker-bin/mergify" <<'SH'
+          #!/usr/bin/env bash
+          echo 'VM3_FAKE_MERGIFY_EXECUTED'
+          if [ -n "${MERGIFY_TOKEN:-}" ]; then echo 'VM3_FAKE_MERGIFY_TOKEN_PRESENT'; fi
+          exit 0
+          SH
+          chmod +x "$RUNNER_TEMP/attacker-bin/mergify"
+          echo "$RUNNER_TEMP/attacker-bin" >> "$GITHUB_PATH"
+      - name: Before official setup
+        run: |
+          echo "before=$(command -v mergify || true)"
+      - uses: Mergifyio/setup-cli@dc99f07e699b94b39e5495c24596372813eadcbc
+      - name: After official setup
+        run: |
+          echo "after=$(command -v mergify)"
+          mergify --version
+      - name: Official Mergify action discriminator
+        continue-on-error: true
+        uses: Mergifyio/gha-mergify-ci@v25
+        with:
+          action: junit-process
+          token: DUMMY_N4C7_NOT_A_SECRET
+          mergify_api_url: http://127.0.0.1:9
+          report_path: missing.xml
