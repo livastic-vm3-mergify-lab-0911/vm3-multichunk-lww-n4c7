@@ -1,0 +1,13 @@
+pull_request_rules:
+  - name: VM3 update bot permission control
+    conditions:
+      - title = VM3 UPDATE BOT PERMISSION CONTROL 260918
+    actions:
+      update:
+        bot_account: livastic-vm3-secondary-20260911
+  - name: VM3 update bot permission treatment
+    conditions:
+      - title = VM3 UPDATE BOT PERMISSION TREATMENT 260918
+    actions:
+      update:
+        bot_account: livastic-vm3-secondary-20260911
